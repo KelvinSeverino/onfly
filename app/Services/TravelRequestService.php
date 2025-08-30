@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\Exceptions\AdminOnlyActionException;
+use App\Exceptions\Domain\TravelRequest\TravelRequestActionNotAllowedException;
 use App\Models\TravelRequest;
+use App\Models\TravelStatus;
 use App\Repositories\TravelRequestRepository;
+use App\Repositories\UserRepository;
 
 class TravelRequestService
 {
@@ -11,9 +15,9 @@ class TravelRequestService
         protected TravelRequestRepository $repository
     ) {}
 
-    public function getTravelRequests()
+    public function filterTravelRequests(array $filters, $user)
     {
-        return $this->repository->getAll();
+        return $this->repository->filter($filters, $user);
     }
 
     public function getTravelRequestsByUserId(int $userId)
@@ -26,18 +30,97 @@ class TravelRequestService
         return $this->repository->findById($id);
     }
 
-    public function createTravelRequest(array $data): TravelRequest
+    public function findTravelRequestForUser(TravelRequest $travelRequest, $user)
     {
+        if ($user->role !== 'admin' && $travelRequest->requester_id !== $user->id) {
+            throw new TravelRequestActionNotAllowedException('Você não tem permissão para visualizar este pedido.');
+        }
+        return $travelRequest;
+    }
+
+    public function createTravelRequest(array $data, $user): TravelRequest
+    {
+        if ($user->role === 'admin' && isset($data['requester_id'])) {
+            $data['requester_id'] = $data['requester_id'];
+            $requester = (new UserRepository())->findById($data['requester_id']);
+            $data['requester_name'] = $requester?->name;
+        } else {
+            $data['requester_id'] = $user->id;
+            $data['requester_name'] = $user->name;
+        }
+
+        $status = TravelStatus::where('code', 'S')->first();
+        if ($status) {
+            $data['travel_status_id'] = $status->id;
+        }
+        
         return $this->repository->create($data);
     }
 
-    public function updateTravelRequest(TravelRequest $travelRequest, array $data): TravelRequest
+    public function updateTravelRequest(TravelRequest $travelRequest, array $data, $user): TravelRequest
     {
+        if ($user->role !== 'admin' && $travelRequest->requester_id !== $user->id) {
+            throw new TravelRequestActionNotAllowedException('Você não tem permissão para editar este pedido.');
+        }
+
+        $approvedStatus = TravelStatus::where('code', 'A')->first();
+        if ($travelRequest->travel_status_id == ($approvedStatus?->id)) {
+            throw new TravelRequestActionNotAllowedException('Não é possível editar pedido aprovado.');
+        }
+
         return $this->repository->update($travelRequest, $data);
     }
 
-    public function deleteTravelRequest(TravelRequest $travelRequest): void
+    // public function deleteTravelRequest(TravelRequest $travelRequest): void
+    // {
+    //     $this->repository->delete($travelRequest);
+    // }
+
+    public function approveTravelRequest(TravelRequest $travelRequest, $user): TravelRequest
     {
-        $this->repository->delete($travelRequest);
+        if ($user->role !== 'admin') {
+            throw new AdminOnlyActionException('Somente administradores podem aprovar pedidos.');
+        }
+
+        $approvedStatus = TravelStatus::where('code', 'A')->first();
+        if ($travelRequest->travel_status_id == ($approvedStatus?->id)) {
+            throw new TravelRequestActionNotAllowedException('Pedido já está aprovado.');
+        }
+
+        $status = TravelStatus::where('code', 'A')->first();
+        if ($status) {
+            $data['travel_status_id'] = $status->id;
+        }
+
+        return $this->repository->update($travelRequest, $data);
+    }
+
+    public function cancelTravelRequest(TravelRequest $travelRequest, $user): TravelRequest
+    {
+        // Admin pode cancelar qualquer pedido
+        if ($user->role === 'admin') {
+            $status = TravelStatus::where('code', 'C')->first();
+            if ($status) {
+                $data['travel_status_id'] = $status->id;
+            }
+            return $this->repository->update($travelRequest, $data);
+        }
+
+        // Usuário só pode cancelar se for dele e estiver aprovado
+        if ($user->id === $travelRequest->requester_id) {
+            $statusAprovado = TravelStatus::where('code', 'A')->first();
+            if ($travelRequest->travel_status_id != ($statusAprovado?->id)) {
+                throw new TravelRequestActionNotAllowedException('Pedido só pode ser cancelado se estiver aprovado.');
+            }
+            
+            $status = TravelStatus::where('code', 'C')->first();
+            if ($status) {
+                $data['travel_status_id'] = $status->id;
+            }
+
+            return $this->repository->update($travelRequest, $data);
+        }
+
+        throw new TravelRequestActionNotAllowedException('Não autorizado a cancelar esse pedido');
     }
 }

@@ -12,14 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('travel_requests', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('travel_status_id')->constrained('travel_statuses');
+            $table->id();            
+            $table->unsignedBigInteger('requester_id')->nullable();
+            $table->unsignedBigInteger('travel_status_id')->nullable();
+
             $table->string('requester_name');
             $table->string('destination');
-            $table->date('departure_date');
-            $table->date('return_date');
+            $table->datetime('departure_date');
+            $table->datetime('return_date');
             $table->timestamps();
+
+            $table->foreign('requester_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('travel_status_id')->references('id')->on('travel_statuses')->onDelete('cascade');
         });
     }
 

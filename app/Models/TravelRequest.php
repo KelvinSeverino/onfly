@@ -7,10 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class TravelRequest extends Model
 {
     protected $fillable = [
-        'user_id', 'travel_status_id',
+        'requester_id', 'travel_status_id',
         'requester_name', 'destination', 
         'departure_date', 'return_date',
     ];
+
+    protected $casts = [
+        'departure_date' => 'datetime',
+        'return_date' => 'datetime',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'requester_id');
+    }
 
     public function status()
     {

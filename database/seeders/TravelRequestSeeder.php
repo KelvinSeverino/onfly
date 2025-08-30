@@ -26,30 +26,30 @@ class TravelRequestSeeder extends Seeder
 
         foreach ($users as $user) {
             TravelRequest::create([
-                'user_id'         => $user->id,
-                'travel_status_id'=> $requested->id,
-                'requester_name'  => $user->name,
-                'destination'     => 'São Paulo',
-                'departure_date'  => Carbon::now()->addDays(10)->toDateString(),
-                'return_date'     => Carbon::now()->addDays(15)->toDateString(),
+                'requester_id'          => $user->id,
+                'travel_status_id'      => $requested->id,
+                'requester_name'        => $user->name,
+                'destination'           => 'São Paulo',
+                'departure_date'        => Carbon::now()->addDays(10)->toDateTimeString(),
+                'return_date'           => Carbon::now()->addDays(15)->toDateTimeString(),
             ]);
 
             TravelRequest::create([
-                'user_id'         => $user->id,
-                'travel_status_id'=> $approved->id,
-                'requester_name'  => $user->name,
-                'destination'     => 'Rio de Janeiro',
-                'departure_date'  => Carbon::now()->subDays(5)->toDateString(),
-                'return_date'     => Carbon::now()->addDays(2)->toDateString(),
+                'requester_id'          => $user->id,
+                'travel_status_id'      => $approved->id,
+                'requester_name'        => $user->name,
+                'destination'           => 'Rio de Janeiro',
+                'departure_date'        => Carbon::now()->addDays(10)->toDateTimeString(),
+                'return_date'           => Carbon::now()->addDays(15)->toDateTimeString(),
             ]);
 
             TravelRequest::create([
-                'user_id'         => $user->id,
-                'travel_status_id'=> $cancelled->id,
-                'requester_name'  => $user->name,
-                'destination'     => 'Curitiba',
-                'departure_date'  => Carbon::now()->addDays(20)->toDateString(),
-                'return_date'     => Carbon::now()->addDays(25)->toDateString(),
+                'requester_id'          => $user->id,
+                'travel_status_id'      => $cancelled->id,
+                'requester_name'        => $user->name,
+                'destination'           => 'Curitiba',
+                'departure_date'        => Carbon::now()->addDays(20)->toDateTimeString(),
+                'return_date'           => Carbon::now()->addDays(25)->toDateTimeString(),
             ]);
         }
     }
