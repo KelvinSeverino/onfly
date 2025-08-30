@@ -15,7 +15,6 @@ class StoreTravelRequestRequest extends FormRequest
     {
         return [
             'requester_id' => 'sometimes|required|int',
-            'requester_name' => 'sometimes|required|string|max:255',
             'destination' => 'required|string|max:255',
             'departure_date' => 'required|date_format:Y-m-d H:i:s',
             'return_date' => 'required|date_format:Y-m-d H:i:s|after_or_equal:departure_date',
