@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TravelRequest extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         'requester_id', 'travel_status_id',
         'requester_name', 'destination', 
