@@ -20,6 +20,10 @@ class AuthenticateWithCookie
     {
         try {
             $token = $request->cookie('token_' . env('APP_NAME'));
+            
+            if (!$token && $request->hasHeader('Authorization')) { // Fallback: busca no header Authorization se não encontrar no cookie
+                $token = $request->bearerToken();
+            }
 
             if (!$token) {
                 throw new TokenMissingException();
