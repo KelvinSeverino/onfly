@@ -17,5 +17,10 @@ Route::middleware('auth.cookie')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('logout', [AuthController::class, 'logout']);
     
-    Route::apiResource('viagens', TravelRequestController::class)->parameters(['viagens' => 'travelRequest']);
+    Route::get('viagens', [TravelRequestController::class, 'index']);
+    Route::get('viagens/{travelRequest}', [TravelRequestController::class, 'show']);
+    Route::post('viagens', [TravelRequestController::class, 'store']);
+    Route::put('viagens/{travelRequest}', [TravelRequestController::class, 'update']);
+    Route::post('viagens/{travelRequest}/aprovar', [TravelRequestController::class, 'approve']);
+    Route::post('viagens/{travelRequest}/cancelar', [TravelRequestController::class, 'cancel']);
 });
