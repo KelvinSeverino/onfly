@@ -6,7 +6,8 @@ use App\Exceptions\Domain\{
     Auth\InvalidCredentialsException,
     Auth\InvalidTokenException,
     Auth\TokenMissingException,
-    Auth\UserNotAuthenticatedException
+    Auth\UserNotAuthenticatedException,
+    TravelRequest\TravelRequestActionNotAllowedException,
 };
 use Throwable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -122,6 +123,18 @@ class Handler extends ExceptionHandler
             ], 401);
         }
 
+        if ($exception instanceof AdminOnlyActionException) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+            ], 403);
+        }
+
+        if ($exception instanceof TravelRequestActionNotAllowedException) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+            ], 403);
+        }
+
         return null;
     }
 
@@ -162,9 +175,16 @@ class Handler extends ExceptionHandler
                     'message' => 'Erro de concorrência: um deadlock foi detectado',
                 ], 500);
 
-            case ($sqlState === 'HY000' || $errorCode == 1205):
+            case ($errorCode == 1205):
                 return response()->json([
                     'message' => 'Erro: tempo limite excedido ao acessar o banco de dados',
+                ], 500);
+
+            case ($errorCode == 1364):
+                preg_match("/Field '([^']+)'/", $exception->getMessage(), $matches);
+                $field = $matches[1] ?? 'campo desconhecido';
+                return response()->json([
+                    'message' => "Erro: O campo '{$field}' não tem um valor padrão",
                 ], 500);
 
             default:
