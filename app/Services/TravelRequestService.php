@@ -44,16 +44,18 @@ class TravelRequestService
             $data['requester_id'] = $data['requester_id'];
             $requester = (new UserRepository())->findById($data['requester_id']);
             $data['requester_name'] = $requester?->name;
-        } else {
+        } else if ($user->role === 'user' && isset($data['requester_id']) && $data['requester_id'] == $user->id) {
             $data['requester_id'] = $user->id;
             $data['requester_name'] = $user->name;
+        } else {
+            throw new TravelRequestActionNotAllowedException('Sem permissão para criar pedido para outro usuário.');
         }
 
         $status = TravelStatus::where('code', 'S')->first();
         if ($status) {
             $data['travel_status_id'] = $status->id;
         }
-        
+
         return $this->repository->create($data);
     }
 
@@ -66,6 +68,11 @@ class TravelRequestService
         $approvedStatus = TravelStatus::where('code', 'A')->first();
         if ($travelRequest->travel_status_id == ($approvedStatus?->id)) {
             throw new TravelRequestActionNotAllowedException('Não é possível editar pedido aprovado.');
+        }
+
+        $cancelledStatus = TravelStatus::where('code', 'C')->first();
+        if ($travelRequest->travel_status_id == ($cancelledStatus?->id)) {
+            throw new TravelRequestActionNotAllowedException('Não é possível editar pedido cancelado.');
         }
 
         return $this->repository->update($travelRequest, $data);
