@@ -66,4 +66,9 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
+
+    public function travelRequests()
+    {
+        return $this->hasMany(TravelRequest::class, 'requester_id');
+    }
 }

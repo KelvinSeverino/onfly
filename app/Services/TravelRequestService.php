@@ -6,6 +6,7 @@ use App\Exceptions\AdminOnlyActionException;
 use App\Exceptions\Domain\TravelRequest\TravelRequestActionNotAllowedException;
 use App\Models\TravelRequest;
 use App\Models\TravelStatus;
+use App\Notifications\TravelRequestStatusChanged;
 use App\Repositories\TravelRequestRepository;
 use App\Repositories\UserRepository;
 
@@ -102,7 +103,13 @@ class TravelRequestService
             $data['travel_status_id'] = $status->id;
         }
 
-        return $this->repository->update($travelRequest, $data);
+        $updated = $this->repository->update($travelRequest, $data);
+        // Notifica o usuário do pedido
+        $requester = $this->userRepository->findById($updated->requester_id);
+        if ($requester && method_exists($requester, 'notify')) {
+            $requester->notify((new TravelRequestStatusChanged($updated, 'aprovado'))->onQueue('emails'));
+        }
+        return $updated;
     }
 
     public function cancelTravelRequest(TravelRequest $travelRequest, $user): TravelRequest
@@ -118,7 +125,12 @@ class TravelRequestService
             if ($cancelledStatus) {
                 $data['travel_status_id'] = $cancelledStatus->id;
             }
-            return $this->repository->update($travelRequest, $data);
+            $updated = $this->repository->update($travelRequest, $data);
+            $requester = $this->userRepository->findById($updated->requester_id);
+            if ($requester && method_exists($requester, 'notify')) {
+                $requester->notify((new TravelRequestStatusChanged($updated, 'cancelado'))->onQueue('emails'));
+            }
+            return $updated;
         }
 
         // Usuário só pode cancelar se for dele e estiver aprovado
@@ -127,7 +139,12 @@ class TravelRequestService
                 $data['travel_status_id'] = $cancelledStatus->id;
             }
 
-            return $this->repository->update($travelRequest, $data);
+            $updated = $this->repository->update($travelRequest, $data);
+            $requester = $this->userRepository->findById($updated->requester_id);
+            if ($requester && method_exists($requester, 'notify')) {
+                $requester->notify((new TravelRequestStatusChanged($updated, 'cancelado'))->onQueue('emails'));
+            }
+            return $updated;
         }
 
         throw new TravelRequestActionNotAllowedException('Não autorizado a cancelar esse pedido');
