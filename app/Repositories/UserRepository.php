@@ -11,7 +11,7 @@ class UserRepository
         return User::get();
     }
 
-    public function findById(int $id): User
+    public function findById(int $id): User|null
     {
         return User::find($id);
     }
