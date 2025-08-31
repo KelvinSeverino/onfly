@@ -247,6 +247,28 @@ class TravelRequestControllerTest extends TestCase
         $this->assertEquals('S', $data['status_code']);
     }
 
+    public function test_admin_fails_create_travel_request_for_user_with_nonexistent_id()
+    {
+        [$admin, $token] = $this->actingAsUser('admin');
+
+        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        $payload = [
+            'requester_id' => 9999,
+            'destination' => 'Berlin',
+            'departure_date' => '2025-09-20 10:00:00',
+            'return_date' => '2025-09-25 18:00:00',
+        ];
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/viagens', $payload);
+        $response->assertStatus(404);
+        $response->assertJson(['message' => 'Usuário solicitante não encontrado.']);
+
+        $data = $response->json('data');
+        $this->assertNull($data);
+    }
+
+
     public function test_store_fails_with_invalid_dates()
     {
         [$user, $token] = $this->actingAsUser();
