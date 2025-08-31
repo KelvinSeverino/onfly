@@ -107,7 +107,7 @@ class TravelRequestService
         // Notifica o usuário do pedido
         $requester = $this->userRepository->findById($updated->requester_id);
         if ($requester && method_exists($requester, 'notify')) {
-            $requester->notify((new TravelRequestStatusChanged($updated, 'aprovado'))->onQueue('emails'));
+            $requester->notify((new TravelRequestStatusChanged($updated, $approvedStatus->code))->onQueue('emails'));
         }
         return $updated;
     }
@@ -128,7 +128,7 @@ class TravelRequestService
             $updated = $this->repository->update($travelRequest, $data);
             $requester = $this->userRepository->findById($updated->requester_id);
             if ($requester && method_exists($requester, 'notify')) {
-                $requester->notify((new TravelRequestStatusChanged($updated, 'cancelado'))->onQueue('emails'));
+                $requester->notify((new TravelRequestStatusChanged($updated, $cancelledStatus->code))->onQueue('emails'));
             }
             return $updated;
         }
@@ -142,7 +142,7 @@ class TravelRequestService
             $updated = $this->repository->update($travelRequest, $data);
             $requester = $this->userRepository->findById($updated->requester_id);
             if ($requester && method_exists($requester, 'notify')) {
-                $requester->notify((new TravelRequestStatusChanged($updated, 'cancelado'))->onQueue('emails'));
+                $requester->notify((new TravelRequestStatusChanged($updated, $cancelledStatus->code))->onQueue('emails'));
             }
             return $updated;
         }
