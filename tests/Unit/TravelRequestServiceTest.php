@@ -197,18 +197,32 @@ class TravelRequestServiceTest extends TestCase
     public function test_admin_can_approve_travel_request()
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $otherUser = User::factory()->create(['role' => 'user']);
         $requestedStatus = TravelStatus::factory()->create(['code' => 'S']);
         $approvedStatus = TravelStatus::factory()->create(['code' => 'A']);
 
-        $travelRequest = new TravelRequest(['travel_status_id' => $requestedStatus->id]);
+        $travelRequest = TravelRequest::factory()->create([
+            'requester_id' => $otherUser->id,
+            'travel_status_id' => $requestedStatus->id
+        ]);
 
         $expectedData = ['travel_status_id' => $approvedStatus->id];
+
+        $this->userRepository
+            ->shouldReceive('findById')
+            ->with($otherUser->id)
+            ->andReturn($otherUser);
+
+        $updatedRequest = $travelRequest->replicate();
+        $updatedRequest->travel_status_id = $approvedStatus->id;
+        $updatedRequest->id = $travelRequest->id;
+
         $this->repository->shouldReceive('update')
             ->once()
             ->with($travelRequest, Mockery::on(function($d) use ($expectedData) {
                 return $d['travel_status_id'] === $expectedData['travel_status_id'];
             }))
-            ->andReturn(new TravelRequest(array_merge($travelRequest->toArray(), $expectedData)));
+            ->andReturn($updatedRequest);
 
         $result = $this->service->approveTravelRequest($travelRequest, $admin);
 
@@ -244,25 +258,33 @@ class TravelRequestServiceTest extends TestCase
     public function test_admin_can_cancel_any_travel_request()
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $statusAprovado = TravelStatus::factory()->create(['code' => 'A']);
-        $statusCancelado = TravelStatus::factory()->create(['code' => 'C']);
-        $travelRequest = new TravelRequest([
-            'travel_status_id' => $statusAprovado->id
+        $approvedStatus = TravelStatus::factory()->create(['code' => 'A']);
+        $cancelledStatus = TravelStatus::factory()->create(['code' => 'C']);
+        $travelRequest = TravelRequest::factory()->create([
+            'requester_id' => $admin->id,
+            'travel_status_id' => $approvedStatus->id
         ]);
+
+        $this->userRepository
+            ->shouldReceive('findById')
+            ->with($admin->id)
+            ->andReturn($admin);
+
+        $updatedRequest = $travelRequest->replicate();
+        $updatedRequest->travel_status_id = $cancelledStatus->id;
+        $updatedRequest->id = $travelRequest->id;
 
         $this->repository
             ->shouldReceive('update')
             ->once()
-            ->with($travelRequest, Mockery::on(function($d) use ($statusCancelado) {
-                return $d['travel_status_id'] === $statusCancelado->id;
+            ->with($travelRequest, Mockery::on(function($d) use ($cancelledStatus) {
+                return $d['travel_status_id'] === $cancelledStatus->id;
             }))
-            ->andReturn(new TravelRequest([
-                'travel_status_id' => $statusCancelado->id
-            ]));
+            ->andReturn($updatedRequest);
 
         $result = $this->service->cancelTravelRequest($travelRequest, $admin);
         $this->assertInstanceOf(TravelRequest::class, $result);
-        $this->assertEquals($statusCancelado->id, $result->travel_status_id);
+        $this->assertEquals($cancelledStatus->id, $result->travel_status_id);
     }
 
     public function test_admin_cannot_cancel_own_non_approved_travel_request()
@@ -287,10 +309,19 @@ class TravelRequestServiceTest extends TestCase
         $approvedStatus = TravelStatus::factory()->create(['code' => 'A']);
         $cancelledStatus = TravelStatus::factory()->create(['code' => 'C']);
 
-        $travelRequest = new TravelRequest([
+        $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $user->id,
             'travel_status_id' => $approvedStatus->id
         ]);
+
+        $this->userRepository
+            ->shouldReceive('findById')
+            ->with($user->id)
+            ->andReturn($user);
+
+        $updatedRequest = $travelRequest->replicate();
+        $updatedRequest->travel_status_id = $cancelledStatus->id;
+        $updatedRequest->id = $travelRequest->id;
 
         $this->repository
             ->shouldReceive('update')
@@ -298,9 +329,7 @@ class TravelRequestServiceTest extends TestCase
             ->with($travelRequest, Mockery::on(function($d) use ($cancelledStatus) {
                 return $d['travel_status_id'] === $cancelledStatus->id;
             }))
-            ->andReturn(new TravelRequest([
-                'travel_status_id' => $cancelledStatus->id
-            ]));
+            ->andReturn($updatedRequest);
 
         $result = $this->service->cancelTravelRequest($travelRequest, $user);
         
