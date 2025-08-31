@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middlewares\AuthenticateWithCookie;
+use App\Http\Middlewares\CheckUserRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,7 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         
         $middleware->alias([
             'auth.cookie' => AuthenticateWithCookie::class,
-        ]);
+            'check.user.role' => CheckUserRole::class,
+        ]);  
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
