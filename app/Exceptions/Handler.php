@@ -132,7 +132,7 @@ class Handler extends ExceptionHandler
         if ($exception instanceof TravelRequestActionNotAllowedException) {
             return response()->json([
                 'message' => $exception->getMessage(),
-            ], 403);
+            ], $exception->getCode());
         }
 
         return null;
