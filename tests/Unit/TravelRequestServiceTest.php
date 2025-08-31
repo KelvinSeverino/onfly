@@ -29,6 +29,29 @@ class TravelRequestServiceTest extends TestCase
         $this->userRepository = Mockery::mock(UserRepository::class);
         $this->service = new TravelRequestService($this->repository, $this->userRepository);
     }
+    
+    public function test_admin_cannot_create_travel_request_for_nonexistent_user()
+    {
+        $this->expectException(TravelRequestActionNotAllowedException::class);
+        $this->expectExceptionCode(404);
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        $status = TravelStatus::factory()->create(['code' => 'S']);
+
+        $data = [
+            'requester_id' => 99999,
+            'destination' => 'Paris',
+            'departure_date' => '2025-09-01 10:00:00',
+            'return_date' => '2025-09-05 18:00:00',
+        ];
+
+        $this->userRepository
+            ->shouldReceive('findById')
+            ->with(99999)
+            ->andReturn(null);
+
+        $this->service->createTravelRequest($data, $admin);
+    }
 
     public function test_admin_can_create_travel_request_for_another_user()
     {
