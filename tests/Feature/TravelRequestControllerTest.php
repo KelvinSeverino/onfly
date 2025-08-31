@@ -25,6 +25,10 @@ class TravelRequestControllerTest extends TestCase
         config(['database.default' => 'sqlite']);
         config(['database.connections.sqlite.database' => ':memory:']);
         Artisan::call('migrate');
+        
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'A'], ['name' => 'Aprovado']);
+        TravelStatus::firstOrCreate(['code' => 'C'], ['name' => 'Cancelado']);
     }
 
     protected function actingAsUser($role = 'user')
@@ -102,7 +106,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        $status = TravelStatus::factory()->create(['code' => 'A']);
+        $status = TravelStatus::firstOrCreate(['code' => 'A'], ['name' => 'Aprovado']);
         TravelRequest::factory()->create(['requester_id' => $user->id, 'travel_status_id' => $status->id]);
         TravelRequest::factory()->create(['requester_id' => $user->id]);
 
@@ -153,7 +157,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $payload = [
             'requester_id' => $user->id,
             'destination' => 'Belo Horizonte',
@@ -188,7 +192,7 @@ class TravelRequestControllerTest extends TestCase
         [$user, $token] = $this->actingAsUser();
 
         $otherUser = User::factory()->create();
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $payload = [
             'requester_id' => $otherUser->id,
             'destination' => 'Belo Horizonte',
@@ -206,7 +210,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $payload = [
             'requester_id' => $admin->id,
             'destination' => 'Berlin',
@@ -228,7 +232,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $otherUser = User::factory()->create();
         $payload = [
             'requester_id' => $otherUser->id,
@@ -251,7 +255,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $payload = [
             'requester_id' => 9999,
             'destination' => 'Berlin',
@@ -273,7 +277,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $payload = [
             'destination' => 'Rome',
             'departure_date' => '2025-09-10 10:00:00',
@@ -290,7 +294,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $payload = [
             'departure_date' => '2025-09-10 10:00:00',
             'return_date' => '2025-09-15 18:00:00',
@@ -306,7 +310,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $travelRequest = TravelRequest::factory()->create(['requester_id' => $user->id]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
@@ -334,7 +338,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $otherUser = User::factory()->create();
         $travelRequest = TravelRequest::factory()->create(['requester_id' => $otherUser->id]);
 
@@ -348,7 +352,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $otherUser = User::factory()->create();
         $travelRequest = TravelRequest::factory()->create(['requester_id' => $otherUser->id]);
 
@@ -378,7 +382,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
         
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $user->id,
             'travel_status_id' => $requestedStatus->id,
@@ -418,7 +422,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $otherUser = User::factory()->create();
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $otherUser->id,
@@ -476,8 +480,8 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
-        $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
+        $approvedStatus = TravelStatus::firstOrCreate(['code' => 'A'], ['name' => 'Aprovado']);
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $user->id,
             'travel_status_id' => $approvedStatus->id,
@@ -495,8 +499,8 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
-        $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
+        $approvedStatus = TravelStatus::firstOrCreate(['code' => 'A'], ['name' => 'Aprovado']);
         $travelRequest = TravelRequest::factory()->create([
             'travel_status_id' => $requestedStatus->id,
         ]);
@@ -526,7 +530,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $travelRequest = TravelRequest::factory()->create([
             'travel_status_id' => $requestedStatus->id,
         ]);
@@ -541,8 +545,8 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
-        $cancelledStatus = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
+        $approvedStatus = TravelStatus::firstOrCreate(['code' => 'A'], ['name' => 'Aprovado']);
+        $cancelledStatus = TravelStatus::firstOrCreate(['code' => 'C'], ['name' => 'Cancelado']);
 
         $approvedRequest = TravelRequest::factory()->create([
             'travel_status_id' => $approvedStatus->id,
@@ -572,7 +576,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
         $unapprovedRequest = TravelRequest::factory()->create([
             'travel_status_id' => $requestedStatus->id,
         ]);
@@ -587,9 +591,9 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
-        $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
-        $cancelledStatus = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
+        $approvedStatus = TravelStatus::firstOrCreate(['code' => 'A'], ['name' => 'Aprovado']);
+        $cancelledStatus = TravelStatus::firstOrCreate(['code' => 'C'], ['name' => 'Cancelado']);
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $user->id,
             'travel_status_id' => $approvedStatus->id,
@@ -620,8 +624,8 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
-        $cancelledStatus = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
+        $requestedStatus = TravelStatus::firstOrCreate(['code' => 'S'], ['name' => 'Solicitado']);
+        $cancelledStatus = TravelStatus::firstOrCreate(['code' => 'C'], ['name' => 'Cancelado']);
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $user->id,
             'travel_status_id' => $requestedStatus->id,
@@ -637,7 +641,7 @@ class TravelRequestControllerTest extends TestCase
     {
         [$user, $token] = $this->actingAsUser();
 
-        $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
+        $approvedStatus = TravelStatus::firstOrCreate(['code' => 'A'], ['name' => 'Aprovado']);
         $otherUser = User::factory()->create();
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $otherUser->id,
