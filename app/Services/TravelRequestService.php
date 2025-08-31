@@ -43,8 +43,10 @@ class TravelRequestService
     {
         if ($user->role === 'admin' && isset($data['requester_id'])) {
             $data['requester_id'] = $data['requester_id'];
-            $requester = $this->userRepository->findById($data['requester_id']);
-            $data['requester_name'] = $requester?->name;
+            if (!$requester = $this->userRepository->findById($data['requester_id'])) {
+                throw new TravelRequestActionNotAllowedException('Usuário solicitante não encontrado.', 404);
+            }
+            $data['requester_name'] = $requester->name;
         } else if ($user->role === 'user' && isset($data['requester_id']) && $data['requester_id'] == $user->id) {
             $data['requester_id'] = $user->id;
             $data['requester_name'] = $user->name;
