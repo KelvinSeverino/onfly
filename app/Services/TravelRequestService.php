@@ -12,7 +12,8 @@ use App\Repositories\UserRepository;
 class TravelRequestService
 {
     public function __construct(
-        protected TravelRequestRepository $repository
+        protected TravelRequestRepository $repository,
+        protected UserRepository $userRepository
     ) {}
 
     public function filterTravelRequests(array $filters, $user)
@@ -42,7 +43,7 @@ class TravelRequestService
     {
         if ($user->role === 'admin' && isset($data['requester_id'])) {
             $data['requester_id'] = $data['requester_id'];
-            $requester = (new UserRepository())->findById($data['requester_id']);
+            $requester = $this->userRepository->findById($data['requester_id']);
             $data['requester_name'] = $requester?->name;
         } else if ($user->role === 'user' && isset($data['requester_id']) && $data['requester_id'] == $user->id) {
             $data['requester_id'] = $user->id;
@@ -103,26 +104,25 @@ class TravelRequestService
     }
 
     public function cancelTravelRequest(TravelRequest $travelRequest, $user): TravelRequest
-    {
+    {                
+        $cancelledStatus = TravelStatus::where('code', 'C')->first();
+        $approvedStatus = TravelStatus::where('code', 'A')->first();
+        if ($travelRequest->travel_status_id != ($approvedStatus?->id)) {
+            throw new TravelRequestActionNotAllowedException('Pedido só pode ser cancelado se estiver aprovado.');
+        }
+
         // Admin pode cancelar qualquer pedido
         if ($user->role === 'admin') {
-            $status = TravelStatus::where('code', 'C')->first();
-            if ($status) {
-                $data['travel_status_id'] = $status->id;
+            if ($cancelledStatus) {
+                $data['travel_status_id'] = $cancelledStatus->id;
             }
             return $this->repository->update($travelRequest, $data);
         }
 
         // Usuário só pode cancelar se for dele e estiver aprovado
         if ($user->id === $travelRequest->requester_id) {
-            $statusAprovado = TravelStatus::where('code', 'A')->first();
-            if ($travelRequest->travel_status_id != ($statusAprovado?->id)) {
-                throw new TravelRequestActionNotAllowedException('Pedido só pode ser cancelado se estiver aprovado.');
-            }
-            
-            $status = TravelStatus::where('code', 'C')->first();
-            if ($status) {
-                $data['travel_status_id'] = $status->id;
+            if ($cancelledStatus) {
+                $data['travel_status_id'] = $cancelledStatus->id;
             }
 
             return $this->repository->update($travelRequest, $data);
