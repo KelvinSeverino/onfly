@@ -515,18 +515,19 @@ class TravelRequestControllerTest extends TestCase
         $response->assertJson(['message' => 'Somente administradores podem aprovar pedidos.']);
     }
 
-    public function test_admin_can_cancel_any_travel_request()
+    public function test_admin_can_cancel_approved_travel_request()
     {
         [$admin, $token] = $this->actingAsUser('admin');
 
-        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
-        $statusCancelado = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
+        $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
+        $cancelledStatus = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
 
-        $travelRequest = TravelRequest::factory()->create([
-            'travel_status_id' => $requestedStatus->id,
+        $approvedRequest = TravelRequest::factory()->create([
+            'travel_status_id' => $approvedStatus->id,
         ]);
+
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $travelRequest->id . '/cancelar');
+            ->postJson('/api/viagens/' . $approvedRequest->id . '/cancelar');
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -541,9 +542,23 @@ class TravelRequestControllerTest extends TestCase
             ]
         ]);
         $data = $response->json('data');
-
         $this->assertEquals('C', $data['status_code']);
         $this->assertEquals('Cancelado', $data['status']);
+    }
+
+    public function test_admin_cannot_cancel_unapproved_travel_request()
+    {
+        [$admin, $token] = $this->actingAsUser('admin');
+
+        $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
+        $unapprovedRequest = TravelRequest::factory()->create([
+            'travel_status_id' => $requestedStatus->id,
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/viagens/' . $unapprovedRequest->id . '/cancelar');
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'Pedido só pode ser cancelado se estiver aprovado.']);
     }
 
     public function test_user_can_cancel_own_approved_travel_request()
@@ -552,7 +567,7 @@ class TravelRequestControllerTest extends TestCase
 
         $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
         $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
-        $statusCancelado = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
+        $cancelledStatus = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $user->id,
             'travel_status_id' => $approvedStatus->id,
@@ -584,7 +599,7 @@ class TravelRequestControllerTest extends TestCase
         [$user, $token] = $this->actingAsUser();
 
         $requestedStatus = TravelStatus::factory()->create(['code' => 'S', 'name' => 'Solicitado']);
-        $statusCancelado = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
+        $cancelledStatus = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $user->id,
             'travel_status_id' => $requestedStatus->id,
@@ -601,7 +616,6 @@ class TravelRequestControllerTest extends TestCase
         [$user, $token] = $this->actingAsUser();
 
         $approvedStatus = TravelStatus::factory()->create(['code' => 'A', 'name' => 'Aprovado']);
-        $statusCancelado = TravelStatus::factory()->create(['code' => 'C', 'name' => 'Cancelado']);
         $otherUser = User::factory()->create();
         $travelRequest = TravelRequest::factory()->create([
             'requester_id' => $otherUser->id,
