@@ -506,7 +506,7 @@ class TravelRequestControllerTest extends TestCase
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $travelRequest->id . '/aprovar');
+            ->patchJson('/api/viagens/' . $travelRequest->id . '/aprovar');
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -536,7 +536,7 @@ class TravelRequestControllerTest extends TestCase
         ]);
         
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $travelRequest->id . '/aprovar');
+            ->patchJson('/api/viagens/' . $travelRequest->id . '/aprovar');
         $response->assertStatus(403);
         $response->assertJson(['message' => 'Somente administradores podem aprovar pedidos.']);
     }
@@ -553,7 +553,7 @@ class TravelRequestControllerTest extends TestCase
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $approvedRequest->id . '/cancelar');
+            ->patchJson('/api/viagens/' . $approvedRequest->id . '/cancelar');
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -582,7 +582,7 @@ class TravelRequestControllerTest extends TestCase
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $unapprovedRequest->id . '/cancelar');
+            ->patchJson('/api/viagens/' . $unapprovedRequest->id . '/cancelar');
         $response->assertStatus(403);
         $response->assertJson(['message' => 'Pedido só pode ser cancelado se estiver aprovado.']);
     }
@@ -600,7 +600,7 @@ class TravelRequestControllerTest extends TestCase
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $travelRequest->id . '/cancelar');
+            ->patchJson('/api/viagens/' . $travelRequest->id . '/cancelar');
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -632,7 +632,7 @@ class TravelRequestControllerTest extends TestCase
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $travelRequest->id . '/cancelar');
+            ->patchJson('/api/viagens/' . $travelRequest->id . '/cancelar');
         $response->assertStatus(403);
         $response->assertJson(['message' => 'Pedido só pode ser cancelado se estiver aprovado.']);
     }
@@ -649,7 +649,7 @@ class TravelRequestControllerTest extends TestCase
         ]);
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/viagens/' . $travelRequest->id . '/cancelar');
+            ->patchJson('/api/viagens/' . $travelRequest->id . '/cancelar');
         $response->assertStatus(403);
         $response->assertJson(['message' => 'Não autorizado a cancelar esse pedido']);
     }
