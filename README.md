@@ -65,11 +65,13 @@ DB_PASSWORD=onfly
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=emailValido@gmail.com
-MAIL_PASSWORD='senhaValida123'
+MAIL_USERNAME=
+MAIL_PASSWORD=
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=mailValido@gmail.com
+MAIL_FROM_ADDRESS=
 MAIL_FROM_NAME="Onfly Viagens Corporativas"
+ 
+ **Atenção:** O preenchimento correto dessas variáveis MAIL é necessário para o funcionamento das notificações por e-mail do sistema.
 ```
 
 Iniciar os containers
