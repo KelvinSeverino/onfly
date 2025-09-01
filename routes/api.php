@@ -21,6 +21,6 @@ Route::middleware('auth.cookie')->group(function () {
     Route::get('viagens/{travelRequest}', [TravelRequestController::class, 'show']);
     Route::post('viagens', [TravelRequestController::class, 'store']);
     Route::put('viagens/{travelRequest}', [TravelRequestController::class, 'update']);
-    Route::post('viagens/{travelRequest}/aprovar', [TravelRequestController::class, 'approve']);
-    Route::post('viagens/{travelRequest}/cancelar', [TravelRequestController::class, 'cancel']);
+    Route::patch('viagens/{travelRequest}/aprovar', [TravelRequestController::class, 'approve']);
+    Route::patch('viagens/{travelRequest}/cancelar', [TravelRequestController::class, 'cancel']);
 });
