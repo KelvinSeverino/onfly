@@ -203,7 +203,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Kelvin\",\r\n    \"email\": \"kelvin@email.com\",\r\n    \"password\": \"123456\",    \r\n    \"role\": \"user\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Kelvin\",\r\n    \"email\": \"kelvin@outlook.com\",\r\n    \"password\": \"123456\",    \r\n    \"role\": \"user\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -369,7 +369,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"requester_id\": 2,\r\n    \"destination\": \"Taubate\",\r\n    \"departure_date\": \"2025-09-01 08:00:00\",\r\n    \"return_date\": \"2025-09-05 18:00:00\"\r\n}",
+							"raw": "{\r\n    \"requester_id\": 3,\r\n    \"destination\": \"Caçapava do Sul\",\r\n    \"departure_date\": \"2025-09-01 08:00:00\",\r\n    \"return_date\": \"2025-09-05 18:00:00\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -430,7 +430,7 @@
 				{
 					"name": "Approve",
 					"request": {
-						"method": "POST",
+						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -442,7 +442,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/viagens/4/aprovar",
+							"raw": "http://localhost:8080/api/viagens/7/aprovar",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -451,7 +451,7 @@
 							"path": [
 								"api",
 								"viagens",
-								"4",
+								"7",
 								"aprovar"
 							]
 						}
@@ -461,7 +461,7 @@
 				{
 					"name": "Cancel",
 					"request": {
-						"method": "POST",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Accept",
@@ -470,7 +470,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8080/api/viagens/4/cancelar",
+							"raw": "http://localhost:8080/api/viagens/7/cancelar",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -479,7 +479,7 @@
 							"path": [
 								"api",
 								"viagens",
-								"4",
+								"7",
 								"cancelar"
 							]
 						}
