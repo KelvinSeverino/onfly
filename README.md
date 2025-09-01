@@ -13,12 +13,24 @@ O projeto segue boas práticas como:
 
 ### 🖥️ Backend (Laravel)
 O backend foi desenvolvido com Laravel e segue uma estrutura modular para garantir organização e escalabilidade:
-- **Handler Global** para tratamento de exceções
-- **Repositories** para abstração de acesso aos dados
-- **Services** para lógica de negócios
-- **Migrations, Seeders, Factories** para gerenciamento do banco de dados
-- **Testes Unitários, Integrações** para garantir qualidade do código
-- **Notifications** uso de Notifications Email aliado ao Jobs do Laravel
+
+## 🚀 Tecnologias utilizadas
+- Laravel 12
+- Docker + Docker-compose
+- JWT
+- MySQL
+- Apache
+- PHPUnit (unitários e feature)
+- Notifications
+
+## 🧩 Funcionalidades
+- Autenticação com JWT
+- Utilização de roles para permissoes entre user e admin
+- Cadastro e gerenciamento de usuarios
+- Cadastro de pedidos de viagem
+- Busca de pedidos por id, status, destino e data
+- Aprovação e cancelamento de pedidos (admins)
+- Notificações de mudança de status disparada por email
 
 ## 💻 Pré-requisitos
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
@@ -110,6 +122,34 @@ Feito os processo acima, você poderá acessar e consumir as rotas disponibiliza
 
 * Backend API Laravel - [http://localhost:8080](http://localhost:8080)
 
+* Utilize um dos usuários abaixo para acessar a API
+
+| Tipo	    | Email	            | Senha   |
+|-----------|-------------------|---------|
+| Admin	    | admin@example.com	| admin   |
+| Usuario	| user@example.com	| test    |
+
+## 🚀 Endpoints principais
+
+| Método | Rota                              | Ação                                       |
+|--------|-----------------------------------|--------------------------------------------|
+| POST   | /api/register                     | Cadastrar um novo usuario                  |
+| POST   | /api/login                        | Login e geração de token JWT               |
+| POST   | /api/logout                       | Logout e exclusao de token JWT             |
+| GET    | /api/profile                      | Retorna o usuário autenticado              |
+|--------|                                   |                                            |
+| GET    | /api/usuarios                     | Lista todos os usuários                    |
+| POST   | /api/usuarios                     | Cria novo usuario                          |
+| GET    | /api/usuarios/{id}                | Retorna usuario                            |
+| POST   | /api/usuarios/{id}                | Atualiza usuario                           |
+| DELETE | /api/usuarios/{id}                | Apaga usuario                              |
+|--------|                                   |                                            |
+| GET    | /api/viagens                      | Lista pedidos de viagem (com filtros)      |
+| POST   | /api/viagens/                     | Cria um novo pedido de viagem              |
+| GET    | /api/viagens/{id}                 | Detalhes de um pedido de viagem            |
+| PATCH  | /api/viagens/{id}/aprovar         | Aprova o pedido de viagem                  |
+| PATCH  | /api/viagens/{id}/cancelar        | Cancela o pedido de viagem                 |
+
 ## 📂 Arquivos Auxiliares
 O projeto inclui materiais para facilitar o entendimento da API:
 
@@ -126,3 +166,14 @@ Para executar os testes, você pode rodar o seguinte comando dentro do container
 ```sh
 docker exec -it onfly_api php artisan test
 ```
+
+* Se preferir testar separadamente os testes, utilize os comandos abaixo:
+```sh
+docker exec -it onfly_api php artisan test --filter=TravelRequestControllerTest
+docker exec -it onfly_api php artisan test --filter=TravelRequestServiceTest
+```
+
+| Tipo     | Arquivo                           | Cobertura                                  |
+|----------|-----------------------------------|--------------------------------------------|
+| Unit     | TravelRequestServiceTest          | Regra de negócio dos pedidos               |
+| Feature  | TravelRequestControllerTest       | API de Pedidos                             |
